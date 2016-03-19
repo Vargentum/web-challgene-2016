@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gant Diagram</title>
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  
+  <h1>Gant Diagram Examples</h1>
+  <p><button data-diagram-load="./data/diagram-1.json">Diagram 1</button></p>
+  <p><button data-diagram-load="./data/diagram-2.json">Diagram 2</button></p>
+
+
+  <div id="diagram-container"></div>
+
+  <script src='./diagramBuilder.js'></script>
+  <script>
+    document.body.addEventListener('click', function(e) {
+      if (e.target && e.target.dataset.diagramLoad) {
+        DiagramBuilder.render({
+          elem: document.getElementById('diagram-container'),
+          file: e.target.dataset.diagramLoad
+        })
+      }
+    })
+
+  </script>
+</body>
+</html>
