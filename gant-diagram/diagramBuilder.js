@@ -1,15 +1,28 @@
 'use strict';
 
-var DiagramBuilder
-(function (DiagramBuilder) {
+var DiagramBuilder = (function () {
   var datePattern = /\d{4}\-\d{2}\-\d{2}/
   var SCALE_TYPES = {
-    hour: 60 * 60 * 100,
-    day: 24 * 60 * 60 * 100,
-    week: 7 * 24 * 60 * 60 * 100,
-    month: 30 * 24 * 60 * 60 * 100,
+    hour: 60 * 60 * 1000,
+    day: 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    month: 30 * 24 * 60 * 60 * 1000,
   }
+  var DEFAULT_SCALE_TYPE = 'day'
 
+  function objectAssign() {
+    var args = Array.prototype.slice.call(arguments)
+    var restlt = {}
+
+    return args.reduce(function(prev, next) {
+      return Object.keys(next).reduce(function(p, k) {
+        p[k] = next[k]
+        console.log(p)
+        return p
+      }, prev)
+    }, {})
+
+  }
 
   function makeRequest(file, onsuccess) {
     var xhr = new XMLHttpRequest()
@@ -42,56 +55,68 @@ var DiagramBuilder
   }
 
   function createTimingPanel(data, scale) {
-    var scale = 'month'
     var timing = getTotalTasksTiming(data)
     var panel = []
     for (var i = dateToInt(timing.start_date);
              i <= dateToInt(timing.end_date);
              i += SCALE_TYPES[scale]) {
       (function(i) {
-        panel.push(new Date(i).toString())
+        panel.push(new Date(i))
       })(i)
     }
     return panel
   }
 
-
-  function buildRow(data, initField, cb) {
-    let row = [initField].concat(createTimingPanel(data))
+  function buildRow(data, scale, initField, cb) {
+    let row = [initField].concat(createTimingPanel(data, scale))
     row.forEach(cb)
   }
 
-
-  function makeDiagramFrom(data) {
+  function makeDiagramFrom(data, scale) {
     var table = document.createElement('table')
     var head = table.createTHead()
-    var headRow = head.insertRow()
-
-    buildRow(data, 'name', function(text) {
-      var cell = headRow.insertCell()
-      cell.innerText = text
-    })
 
     data.forEach(function(entry) {
       var bodyRow = table.insertRow()
-      buildRow(data, entry.text, function(text, idx) {
+      buildRow(data, scale, entry.text, function(date, idx) {
         var cell = bodyRow.insertCell()
         if (idx === 0) {
-          cell.innerText = text
+          cell.innerText = date
+        } 
+        else if(
+          dateToInt(date) >= dateToInt(entry.start_date) && 
+          dateToInt(date) <= dateToInt(entry.end_date)
+        ) {
+          cell.classList.add('is-active')
         }
       })
     })
-
+    var headRow = head.insertRow()
+    buildRow(data, scale, 'name', function(date) {
+      var cell = headRow.insertCell()
+      cell.innerText = date
+    })
     return table
   }
 
 
-  DiagramBuilder.render = function(config){
-    makeRequest(config.file, function(data) {
-      config.elem.innerHTML = ""
-      config.elem.appendChild(makeDiagramFrom(data))
-    })
+  function DiagramBuilder(config) {
+    this.config = config
+    this.config.scale = config.scale || DEFAULT_SCALE_TYPE
+  }
+
+  DiagramBuilder.prototype.init = function(){
+    var handleUpdate = function(data) {
+      this.config.elem.innerHTML = ""
+      this.config.elem.appendChild(makeDiagramFrom(data, this.config.scale))
+    }
+    makeRequest(this.config.file, handleUpdate.bind(this))
   };
 
+  DiagramBuilder.prototype.update = function(newConfig){
+    this.config = objectAssign(this.config, newConfig)
+    this.init(this.config) 
+  }
+
   return DiagramBuilder
-})(DiagramBuilder || (DiagramBuilder = {}))
+})()

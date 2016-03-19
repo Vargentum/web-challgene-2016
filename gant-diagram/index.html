@@ -12,16 +12,44 @@
   <p><button data-diagram-load="./data/diagram-1.json">Diagram 1</button></p>
   <p><button data-diagram-load="./data/diagram-2.json">Diagram 2</button></p>
 
+  <h3>Scale switcher</h3>
+  <label>
+    <input type="radio" name="diagram-scale" value="hour" />
+    Hour
+  </label>
+  <label>
+    <input type="radio" name="diagram-scale" value="day" checked />
+    Day
+  </label>
+  <label>
+    <input type="radio" name="diagram-scale" value="week" />
+    Week
+  </label>
+  <label>
+    <input type="radio" name="diagram-scale" value="month" />
+    Month
+  </label>
 
   <div id="diagram-container"></div>
 
   <script src='./diagramBuilder.js'></script>
   <script>
+    var Builider = new DiagramBuilder({
+      elem: document.getElementById('diagram-container'),
+    })
+
     document.body.addEventListener('click', function(e) {
       if (e.target && e.target.dataset.diagramLoad) {
-        DiagramBuilder.render({
-          elem: document.getElementById('diagram-container'),
+        Builider.update({
           file: e.target.dataset.diagramLoad
+        })
+      }
+    })
+
+    document.body.addEventListener('change', function(e) {
+      if (e.target && e.target.name === 'diagram-scale') {
+        Builider.update({
+          scale: e.target.value
         })
       }
     })
