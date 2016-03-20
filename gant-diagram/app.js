@@ -98,7 +98,7 @@ var ChartBuilder = (function () {
   function makeDiagramFrom(data, scale) {
     var table = document.createElement('table')
     var head = table.createTHead()
-    var tasks = flattenTasks(data)
+    var tasks = deepPluck(data, 'Tasks')
     tasks.forEach(function(entry) {
       console.log(entry)
       var bodyRow = table.insertRow()
@@ -126,15 +126,16 @@ var ChartBuilder = (function () {
   }
 
 
-  function flattenTasks(data) {
-    return Object.keys(data).reduce(function(p, key) {
-      var t = data[key]
-      if (!t.Tasks) return p
-      if (!t.Tasks.Task.length) return p.concat([n])
-      return t.Tasks.Task.map(flattenTasks)
-    }, [])
+  function deepPluck(data, prop) {
+    var container = []
+    data.forEach(function pluck(d){
+      container.push(d)
+      if (d[prop] && d[prop].length) {
+        d[prop].forEach(pluck)
+      }
+    })
+    return container
   }
-
 
 
   function ChartBuilder(data, config) {
