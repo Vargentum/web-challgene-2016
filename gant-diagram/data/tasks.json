@@ -82,35 +82,5 @@
         "Name": "Ext Scheduler 2.0"
       }
     ]
-  },
-  {
-    "Id": "33",
-    "leaf": "1",
-    "Name": "Unplanned task 1"
-  },
-  {
-    "Id": "34",
-    "leaf": "1",
-    "Name": "Unplanned task 11"
-  },
-  {
-    "Id": "35",
-    "leaf": "1",
-    "Name": "Unplanned task 2.0"
-  },
-  {
-    "Id": "43",
-    "leaf": "1",
-    "Name": "Unplanned task 14"
-  },
-  {
-    "Id": "44",
-    "leaf": "1",
-    "Name": "Unplanned task 3"
-  },
-  {
-    "Id": "45",
-    "leaf": "1",
-    "Name": "Unplanned task 4"
   }
 ]

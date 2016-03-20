@@ -80,7 +80,7 @@ var ChartBuilder = (function () {
   var DEFAULT_SCALE_TYPE = 'day'
 
   function dateToInt (s) { return new Date(s).getTime()}
-  function durToInt (d) { return parseInt(d) * SCALE_TYPES['hour']}
+  function durToInt (d) { return parseInt(d) * SCALE_TYPES['day']}
 
   function getEarliest (startDates) {
     return startDates
@@ -116,20 +116,36 @@ var ChartBuilder = (function () {
 
   function makeDiagramFrom(data, scale) {
     var table = document.createElement('table')
-    var head = table.createTHead()
+    var headRow = table.createTHead().insertRow()
+
     var tasks = Utils.flattenContains(data, 'Tasks')
     var startDates = Utils.pluck(tasks, 'StartDate')
     var durations = Utils.pluck(tasks, 'Duration')
+
     var min = getEarliest(startDates)
     var max = getLatest(startDates, durations)
 
-    tasks.forEach(function(entry) {
+    tasks.forEach(function(entry, i) {
       var bodyRow = table.insertRow()
+      var startDate = dateToInt(startDates[i])
+      var endDate = startDate + durToInt(durations[i])
+      console.log(entry.Name, durations[i],  new Date(endDate))
+
       buildRow(min, max, scale, function(tmz) {
         var cell = bodyRow.insertCell()
-        cell.innerText = '1'        
+        if (startDate <= dateToInt(tmz) && dateToInt(tmz) <= endDate) {
+          if (startDate !== endDate) {
+            cell.classList.add('is-active')
+          }
+        }
       })
     })
+
+    buildRow(min, max, scale, function(tmz) {
+      var cell = headRow.insertCell()
+      cell.innerText = tmz.toDateString()
+    })
+
     return table
   }
 
@@ -160,7 +176,7 @@ var GroupsBuilder = (function () {
 
   function r_tasks(data) {
     var list = document.createElement('ul')
-    
+
     data.forEach(function(task) {
       var item = document.createElement('li')
       item.innerText = task.Name
@@ -209,8 +225,9 @@ var App = (function () {
     }
   }
 
-  function initModules(k) {
-    this.config.elem.appendChild(this.modules[k])
+  function initModules(name) {
+    this.modules[name].classList.add(name)
+    this.config.elem.appendChild(this.modules[name])
   }
 
 
