@@ -39,6 +39,28 @@ var Utils = (function() {
     return Array.prototype.slice.call(collection)
   }
 
+  Utils.flattenContains = function flattenContains(data, prop) {
+    var res = []
+    data.forEach(function flat(d){
+      res.push(d)
+      if (d[prop] && d[prop].length) {
+        d[prop].forEach(flat)
+      }
+    })
+    return res
+  }
+
+  Utils.pluck = function pluck(data, prop) {
+    return data
+      .filter(function(entry) {
+        return entry[prop]
+      })
+      .map(function(entry) {
+        return entry[prop]
+      })
+  }
+
+
   return Utils
 })()
 
@@ -57,32 +79,30 @@ var ChartBuilder = (function () {
   }
   var DEFAULT_SCALE_TYPE = 'day'
 
-
   function dateToInt (s) { return new Date(s).getTime()}
+  function durToInt (d) { return parseInt(d) * SCALE_TYPES['hour']}
 
-  function getLowest(d1, d2) {
-    return dateToInt(d1) < dateToInt(d2) ? d1 : d2
-  }
-  function getLargest(d1, d2) {
-    return dateToInt(d1) > dateToInt(d2) ? d1 : d2
-  }
-
-
-  function getTotalTasksTiming (data) {
-    return data.reduce(function(p, n) {
-      return {
-        start_date: getLowest(n.start_date, p.start_date),
-        end_date:   getLargest(n.end_date, p.end_date)
-      }
-    })
+  function getEarliest (startDates) {
+    return startDates
+      .map(dateToInt)
+      .sort(function(d1, d2) {
+        return d1 - d2
+      })[0]
   }
 
-  function createTimingPanel(data, scale) {
-    var timing = getTotalTasksTiming(data)
+  function getLatest (startDates, durations) {
+    return startDates
+      .map(function(d, i) {
+        return dateToInt(d) + durToInt(durations[i])
+      })
+      .sort(function(d1, d2) {
+        return d2 - d1
+      })[0]
+  }
+
+  function createTimingPanel(min, max, scale) {
     var panel = []
-    for (var i = dateToInt(timing.start_date);
-             i <= dateToInt(timing.end_date);
-             i += SCALE_TYPES[scale]) {
+    for (var i = min; i <= max; i += SCALE_TYPES[scale]) {
       (function(i) {
         panel.push(new Date(i))
       })(i)
@@ -90,51 +110,27 @@ var ChartBuilder = (function () {
     return panel
   }
 
-  function buildRow(data, scale, initField, forEachTimezone) {
-    let row = [initField].concat(createTimingPanel(data, scale))
-    row.forEach(forEachTimezone)
+  function buildRow(min, max, scale, forEachTimezone) {
+    createTimingPanel(min, max, scale).forEach(forEachTimezone)
   }
 
   function makeDiagramFrom(data, scale) {
     var table = document.createElement('table')
     var head = table.createTHead()
-    var tasks = deepPluck(data, 'Tasks')
+    var tasks = Utils.flattenContains(data, 'Tasks')
+    var startDates = Utils.pluck(tasks, 'StartDate')
+    var durations = Utils.pluck(tasks, 'Duration')
+    var min = getEarliest(startDates)
+    var max = getLatest(startDates, durations)
+
     tasks.forEach(function(entry) {
-      console.log(entry)
       var bodyRow = table.insertRow()
-      var cell = bodyRow.insertCell()
-      cell.innerText('1')
-      // buildRow(data, scale, entry.text, function(date, idx) {
-      //   var cell = bodyRow.insertCell()
-      //   if (idx === 0) {
-      //     cell.innerText = date
-      //   }
-      //   else if(
-      //     dateToInt(date) >= dateToInt(entry.start_date) &&
-      //     dateToInt(date) <= dateToInt(entry.end_date)
-      //   ) {
-      //     cell.classList.add('is-active')
-      //   }
-      // })
+      buildRow(min, max, scale, function(tmz) {
+        var cell = bodyRow.insertCell()
+        cell.innerText = '1'        
+      })
     })
-    // var headRow = head.insertRow()
-    // buildRow(data, scale, 'name', function(date) {
-    //   var cell = headRow.insertCell()
-    //   cell.innerText = date
-    // })
     return table
-  }
-
-
-  function deepPluck(data, prop) {
-    var container = []
-    data.forEach(function pluck(d){
-      container.push(d)
-      if (d[prop] && d[prop].length) {
-        d[prop].forEach(pluck)
-      }
-    })
-    return container
   }
 
 
@@ -164,16 +160,13 @@ var GroupsBuilder = (function () {
 
   function r_tasks(data) {
     var list = document.createElement('ul')
-    var tasks = []
-    if (data.Tasks) {
-      Array.isArray(data.Tasks.Task)
-        ? tasks = data.Tasks.Task
-        : tasks = [data.Tasks.Task]
-    }
-    tasks.forEach(function(task) {
+    
+    data.forEach(function(task) {
       var item = document.createElement('li')
       item.innerText = task.Name
-      if (task.Tasks) item.appendChild(r_tasks(task))
+      if (task.Tasks && task.Tasks.length) {
+        item.appendChild(r_tasks(task.Tasks))
+      }
       list.appendChild(item)
     })
     return list
