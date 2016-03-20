@@ -18,7 +18,7 @@
   </label>
   -->
   <label>
-    <input type="radio" name="diagram-file" value="./data/tasks.json" />
+    <input type="radio" name="diagram-file" value="./data/tasks.json" checked />
     Tasks
   </label>
 
@@ -41,21 +41,20 @@
     Month
   </label>
 
-  <div id="diagram-container"></div>
+  <div id="app"></div>
+
 
   <script src='./app.js'></script>
   <script>
-    var Builder = new DiagramBuilder({
-      elem: document.getElementById('diagram-container'),
+    var App = new App({
       file: './data/tasks.json',
-      scale: 'day'
+      scale: 'day',
+      elem: document.getElementById('app')
     })
-
-    Builder.init()
 
     document.body.addEventListener('change', function(e) {
       if (e.target && e.target.name === 'diagram-file') {
-        Builder.update({
+        App.update({
           file: e.target.value
         })
       }
@@ -63,7 +62,7 @@
 
     document.body.addEventListener('change', function(e) {
       if (e.target && e.target.name === 'diagram-scale') {
-        Builder.update({
+        App.update({
           scale: e.target.value
         })
       }
