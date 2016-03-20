@@ -35,6 +35,10 @@ var Utils = (function() {
     return str
   }
 
+  Utils.$$ = function(collection) {
+    return Array.prototype.slice.call(collection)
+  }
+
   return Utils
 })()
 
@@ -94,48 +98,58 @@ var ChartBuilder = (function () {
   function makeDiagramFrom(data, scale) {
     var table = document.createElement('table')
     var head = table.createTHead()
-
-    data.forEach(function(entry) {
+    var tasks = flattenTasks(data)
+    tasks.forEach(function(entry) {
+      console.log(entry)
       var bodyRow = table.insertRow()
-      buildRow(data, scale, entry.text, function(date, idx) {
-        var cell = bodyRow.insertCell()
-        if (idx === 0) {
-          cell.innerText = date
-        }
-        else if(
-          dateToInt(date) >= dateToInt(entry.start_date) &&
-          dateToInt(date) <= dateToInt(entry.end_date)
-        ) {
-          cell.classList.add('is-active')
-        }
-      })
+      var cell = bodyRow.insertCell()
+      cell.innerText('1')
+      // buildRow(data, scale, entry.text, function(date, idx) {
+      //   var cell = bodyRow.insertCell()
+      //   if (idx === 0) {
+      //     cell.innerText = date
+      //   }
+      //   else if(
+      //     dateToInt(date) >= dateToInt(entry.start_date) &&
+      //     dateToInt(date) <= dateToInt(entry.end_date)
+      //   ) {
+      //     cell.classList.add('is-active')
+      //   }
+      // })
     })
-    var headRow = head.insertRow()
-    buildRow(data, scale, 'name', function(date) {
-      var cell = headRow.insertCell()
-      cell.innerText = date
-    })
+    // var headRow = head.insertRow()
+    // buildRow(data, scale, 'name', function(date) {
+    //   var cell = headRow.insertCell()
+    //   cell.innerText = date
+    // })
     return table
   }
 
 
-  function ChartBuilder(config) {
+  function flattenTasks(data) {
+    return Object.keys(data).reduce(function(p, key) {
+      var t = data[key]
+      if (!t.Tasks) return p
+      if (!t.Tasks.Task.length) return p.concat([n])
+      return t.Tasks.Task.map(flattenTasks)
+    }, [])
+  }
+
+
+
+  function ChartBuilder(data, config) {
     this.config = config
     this.config.scale = config.scale || DEFAULT_SCALE_TYPE
+    this.data = data
+    this.chart = makeDiagramFrom(this.data, this.config.scale)
   }
 
-  ChartBuilder.prototype.render = function(){
-    var handleUpdate = function(data) {
-      this.config.elem.innerHTML = ""
-      this.config.elem.appendChild(makeDiagramFrom(data, this.config.scale))
-    }
-    makeRequest(this.config.file, handleUpdate.bind(this))
+  ChartBuilder.prototype.mountTo = function(point){
+    Utils.$$(point.children).forEach(function(c) {
+      point.removeChild(c)
+    })
+    point.appendChild(this.chart)
   };
-
-  ChartBuilder.prototype.update = function(newConfig){
-    this.config = Utils.objectAssign(this.config, newConfig)
-    this.init(this.config)
-  }
 
   return ChartBuilder
 })()
@@ -151,7 +165,7 @@ var GroupsBuilder = (function () {
     var list = document.createElement('ul')
     var tasks = []
     if (data.Tasks) {
-      Array.isArray(data.Tasks.Task) 
+      Array.isArray(data.Tasks.Task)
         ? tasks = data.Tasks.Task
         : tasks = [data.Tasks.Task]
     }
@@ -172,6 +186,9 @@ var GroupsBuilder = (function () {
   }
 
   GroupsBuilder.prototype.mountTo = function mountTo(point) {
+    Utils.$$(point.children).forEach(function(c) {
+      point.removeChild(c)
+    })
     point.appendChild(this.list)
   }
 
@@ -198,28 +215,29 @@ var App = (function () {
     }
   }
 
+  function initModules(k) {
+    this.config.elem.appendChild(this.modules[k])
+  }
+
 
   function App (config) {
     this.config = config
+    this.modules = {
+      groups: document.createElement('div'),
+      chart: document.createElement('div')
+    }
+    Object.keys(this.modules).forEach(initModules.bind(this))
     this.init()
   }
 
   App.prototype.init = function() {
-    var groups = document.createElement('div')
-      , chart = document.createElement('div')
-
     function initComponents(data) {
       this.GroupsBuilder = new GroupsBuilder(data, this.config)
-      // this.ChartBuilder = new ChartBuilder(data, this.config)
-      this.GroupsBuilder.mountTo(groups)
-      // this.ChartBuilder.mountTo(chart)
-
-      this.config.elem.appendChild(groups)
-      // this.config.elem.appendChild(chart)
+      this.ChartBuilder = new ChartBuilder(data, this.config)
+      this.GroupsBuilder.mountTo(this.modules.groups)
+      this.ChartBuilder.mountTo(this.modules.chart)
     }
     getData(this.config.file, initComponents.bind(this))
-
-
   }
 
   App.prototype.update = function(newConfig) {
