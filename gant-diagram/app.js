@@ -1,7 +1,40 @@
 'use strict';
 
+var Utils = (function() {
+
+  var Utils = {}
+
+  Utils.objectAssign = function objectAssign() {
+    var args = Array.prototype.slice.call(arguments)
+    var restlt = {}
+
+    return args.reduce(function(prev, next) {
+      return Object.keys(next).reduce(function(p, k) {
+        p[k] = next[k]
+        return p
+      }, prev)
+    }, {})
+  }
+
+  Utils.template = function(str, data) {
+    Object.keys(data).forEach(function(key, i, data) {
+      str = str.replace(new RegExp("\$\{\("+ data[key] +")\}", '$1'))
+    })
+    return str
+  }
+
+  return Utils
+})()
+
+
+
+/*-------------------------------------------
+DiagramBuilder
+-------------------------------------------*/
+
+
 var DiagramBuilder = (function () {
-  var datePattern = /\d{4}\-\d{2}\-\d{2}/
+  
   var SCALE_TYPES = {
     hour: 60 * 60 * 1000,
     day: 24 * 60 * 60 * 1000,
@@ -9,21 +42,7 @@ var DiagramBuilder = (function () {
     month: 30 * 24 * 60 * 60 * 1000,
   }
   var DEFAULT_SCALE_TYPE = 'day'
-
-  function objectAssign() {
-    var args = Array.prototype.slice.call(arguments)
-    var restlt = {}
-
-    return args.reduce(function(prev, next) {
-      return Object.keys(next).reduce(function(p, k) {
-        p[k] = next[k]
-        console.log(p)
-        return p
-      }, prev)
-    }, {})
-
-  }
-
+  
   function makeRequest(file, onsuccess) {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', file)
@@ -67,9 +86,9 @@ var DiagramBuilder = (function () {
     return panel
   }
 
-  function buildRow(data, scale, initField, cb) {
+  function buildRow(data, scale, initField, forEachTimezone) {
     let row = [initField].concat(createTimingPanel(data, scale))
-    row.forEach(cb)
+    row.forEach(forEachTimezone)
   }
 
   function makeDiagramFrom(data, scale) {
@@ -107,6 +126,7 @@ var DiagramBuilder = (function () {
 
   DiagramBuilder.prototype.init = function(){
     var handleUpdate = function(data) {
+      debugger
       this.config.elem.innerHTML = ""
       this.config.elem.appendChild(makeDiagramFrom(data, this.config.scale))
     }
@@ -114,9 +134,37 @@ var DiagramBuilder = (function () {
   };
 
   DiagramBuilder.prototype.update = function(newConfig){
-    this.config = objectAssign(this.config, newConfig)
+    this.config = Utils.objectAssign(this.config, newConfig)
     this.init(this.config) 
   }
 
   return DiagramBuilder
 })()
+
+
+
+/*------------------------------------------------
+  GroupsBuilder
+------------------------------------------------*/
+
+
+var GroupsBuilder = (function (GroupsBuilder) {
+
+  function r_list(data) {
+    return Object.keys(data).reduce(function(p, key, data) {
+
+      return p += Utils.template(`<li>${callback}</li>`)
+    }, Utils.template(`<ul>${data}</ul>`, data))
+  }
+
+  function GroupsBuilder(json) {
+    this.groups = JSON.parse(json)
+    this.list = document.createElement('ul')
+  }
+
+  GroupsBuilder.prototype.init = function init(){
+    this.list.innerHTML = r_list(this.groups)
+  }
+
+  return GroupsBuilder
+})(GroupsBuilder || (GroupsBuilder = {}))
