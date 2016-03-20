@@ -28,20 +28,55 @@
             "Name": "Ext JS 4.0.1"
           },
           {
-            "Duration": "4",
+            "Duration": "7",
             "PercentDone": "30",
-            "StartDate": "2010-01-22T00:00:00",
+            "StartDate": "2010-01-20T00:00:00",
             "Id": "4",
             "leaf": "1",
             "Name": "Ext JS 4.0.2"
           },
           {
-            "Duration": "0",
+            "Duration": "2",
             "PercentDone": "10",
-            "StartDate": "2010-01-28T00:00:00",
+            "StartDate": "2010-01-21T00:00:00",
             "Id": "5",
             "leaf": "1",
             "Name": "Ext JS 4.0.3"
+          }
+        ]
+      },{
+        "expanded": "1",
+        "StartDate": "2010-01-20T00:00:00",
+        "Duration": "8",
+        "PercentDone": "40",
+        "Id": "6",
+        "leaf": "0",
+        "Name": "Ext 6.x branch",
+        "cls": "ExtJS",
+        "Tasks": [
+          {
+            "Duration": "6",
+            "PercentDone": "50",
+            "StartDate": "2010-01-22T00:00:00",
+            "Id": "7",
+            "leaf": "1",
+            "Name": "Ext JS 6.0.1"
+          },
+          {
+            "Duration": "12",
+            "PercentDone": "30",
+            "StartDate": "2010-01-20T00:00:00",
+            "Id": "8",
+            "leaf": "1",
+            "Name": "Ext JS 6.0.2"
+          },
+          {
+            "Duration": "3",
+            "PercentDone": "10",
+            "StartDate": "2010-01-30T00:00:00",
+            "Id": "9",
+            "leaf": "1",
+            "Name": "Ext JS 6.0.3"
           }
         ]
       }
@@ -51,7 +86,7 @@
     "expanded": "1",
     "StartDate": "2010-01-28T00:00:00",
     "Duration": "12",
-    "PercentDone": "28.181818181818183",
+    "PercentDone": "28",
     "Id": "Bryntum",
     "cls": "Bryntum",
     "leaf": "0",
@@ -66,7 +101,7 @@
         "Name": "Product X"
       },
       {
-        "Duration": "4",
+        "Duration": "5",
         "PercentDone": "30",
         "StartDate": "2010-02-05T00:00:00",
         "Id": "14",
