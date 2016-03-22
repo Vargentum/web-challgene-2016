@@ -8,9 +8,18 @@
 </head>
 <body>
   
-  <h1>Gant Diagram Examples</h1>
-  <p><button data-diagram-load="./data/diagram-1.json">Diagram 1</button></p>
-  <p><button data-diagram-load="./data/diagram-2.json">Diagram 2</button></p>
+  <h1>Gant time-based diagrams</h1>
+
+  <h3>Examples</h3>
+  <label>
+    <input type="radio" name="diagram-file" value="./data/tasks-1.json" checked />
+    Tasks 2010
+  </label>
+  <label>
+    <input type="radio" name="diagram-file" value="./data/tasks-2.json" />
+    Tasks 2015
+  </label>
+
 
   <h3>Scale switcher</h3>
   <label>
@@ -30,25 +39,32 @@
     Month
   </label>
 
-  <div id="diagram-container"></div>
+  <div id="app"></div>
 
-  <script src='./diagramBuilder.js'></script>
+
+  <script src='./app.js'></script>
   <script>
-    var Builider = new DiagramBuilder({
-      elem: document.getElementById('diagram-container'),
+    function getInitialFrom(name) {
+      return Utils.$('[name='+name+']').filter(function(i) {return i.checked})[0].value
+    }
+
+    var App = new App({
+      file: getInitialFrom('diagram-file'),
+      scale: getInitialFrom('diagram-scale'),
+      elem: document.getElementById('app')
     })
 
-    document.body.addEventListener('click', function(e) {
-      if (e.target && e.target.dataset.diagramLoad) {
-        Builider.update({
-          file: e.target.dataset.diagramLoad
+    document.body.addEventListener('change', function(e) {
+      if (e.target && e.target.name === 'diagram-file') {
+        App.update({
+          file: e.target.value
         })
       }
     })
 
     document.body.addEventListener('change', function(e) {
       if (e.target && e.target.name === 'diagram-scale') {
-        Builider.update({
+        App.update({
           scale: e.target.value
         })
       }
