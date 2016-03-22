@@ -82,6 +82,13 @@ var ChartBuilder = (function () {
     month: 30 * 24 * 60 * 60 * 1000,
   }
   var DEFAULT_SCALE_TYPE = 'day'
+  var DATA_INDEXES = {
+    hour: [0, 2],
+    day:  [2,1],
+    week: [2,3],
+    month: [1,3]
+  }
+  // "Mon Jan 18 2010"
 
   function dateToInt (s) { return new Date(s).getTime()}
   function durToInt (d) { return parseInt(d) * SCALE_TYPES['day']}
@@ -122,7 +129,11 @@ var ChartBuilder = (function () {
     var headRow = table.createTHead().insertRow()
     buildRow(min, max, scale, function(tmz) {
       var cell = headRow.insertCell()
-      cell.innerText = tmz.toDateString()
+      cell.innerText = (function(timeArr) {
+        return (function(idxToGet) {
+          return idxToGet.reduce(function(p, n) { return p + ' ' + timeArr[n] }, '')
+        })(DATA_INDEXES[scale])
+      })(tmz.toDateString().split(' '))
     })
   }
 
