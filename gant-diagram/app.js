@@ -129,7 +129,6 @@ var ChartBuilder = (function () {
       var bodyRow = table.insertRow()
       var startDate = dateToInt(startDates[i])
       var endDate = startDate + durToInt(durations[i])
-      console.log(entry.Name, durations[i],  new Date(endDate))
 
       buildRow(min, max, scale, function(tmz) {
         var cell = bodyRow.insertCell()
@@ -150,10 +149,30 @@ var ChartBuilder = (function () {
   }
 
 
+  function getChildrenDuration(arr) {
+    return arr.reduce(function(p, n) {
+      return n.Tasks && n.Tasks.length
+        ? p + getChildrenDuration(n.Tasks)
+        : p + parseInt(n.Duration)
+    }, 0)
+  }
+
+
+  function updateDurations(arr) {
+    return arr.map(function(entry) {
+      if (entry.Tasks && entry.Tasks.length) {
+        entry.Duration = getChildrenDuration(entry.Tasks)
+        updateDurations(entry.Tasks)
+      } 
+      return entry
+    })
+  }
+
+
   function ChartBuilder(data, config) {
     this.config = config
     this.config.scale = config.scale || DEFAULT_SCALE_TYPE
-    this.data = data
+    this.data = updateDurations(data)
     this.chart = makeDiagramFrom(this.data, this.config.scale)
   }
 
