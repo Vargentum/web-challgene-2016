@@ -11,15 +11,13 @@
   <h1>Gant time-based diagrams</h1>
 
   <h3>Examples</h3>
-  <!-- 
   <label>
-    <input type="radio" name="diagram-file" value="./data/skills.json" checked />
-    Skills
+    <input type="radio" name="diagram-file" value="./data/tasks-1.json" checked />
+    Tasks 2010
   </label>
-  -->
   <label>
-    <input type="radio" name="diagram-file" value="./data/tasks.json" checked />
-    Tasks
+    <input type="radio" name="diagram-file" value="./data/tasks-2.json" />
+    Tasks 2015
   </label>
 
 
@@ -46,9 +44,13 @@
 
   <script src='./app.js'></script>
   <script>
+    function getInitialFrom(name) {
+      return Utils.$('[name='+name+']').filter(function(i) {return i.checked})[0].value
+    }
+
     var App = new App({
-      file: './data/tasks.json',
-      scale: 'day',
+      file: getInitialFrom('diagram-file'),
+      scale: getInitialFrom('diagram-scale'),
       elem: document.getElementById('app')
     })
 

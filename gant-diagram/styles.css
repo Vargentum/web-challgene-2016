@@ -41,6 +41,9 @@ td.is-active {
   background-color: green
 }
 
+// tbody tr:hover td {
+//   background-color: rgba(0,0,0,.1)
+// }
 
 /*Groups styles -----------------------------*/
 .groups{

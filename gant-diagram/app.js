@@ -35,6 +35,10 @@ var Utils = (function() {
     return str
   }
 
+  Utils.$ = function(query) {
+    return Array.prototype.slice.call(document.querySelectorAll(query))
+  }
+
   Utils.$$ = function(collection) {
     return Array.prototype.slice.call(collection)
   }
@@ -114,17 +118,15 @@ var ChartBuilder = (function () {
     createTimingPanel(min, max, scale).forEach(forEachTimezone)
   }
 
-  function makeDiagramFrom(data, scale) {
-    var table = document.createElement('table')
+  function buildHead(table, min, max, scale) {
     var headRow = table.createTHead().insertRow()
+    buildRow(min, max, scale, function(tmz) {
+      var cell = headRow.insertCell()
+      cell.innerText = tmz.toDateString()
+    })
+  }
 
-    var tasks = Utils.flattenContains(data, 'Tasks')
-    var startDates = Utils.pluck(tasks, 'StartDate')
-    var durations = Utils.pluck(tasks, 'Duration')
-
-    var min = getEarliest(startDates)
-    var max = getLatest(startDates, durations)
-
+  function buildBody(tasks, startDates, durations, table, min, max, scale) {
     tasks.forEach(function(entry, i) {
       var bodyRow = table.insertRow()
       var startDate = dateToInt(startDates[i])
@@ -139,12 +141,23 @@ var ChartBuilder = (function () {
         }
       })
     })
+  }
 
-    buildRow(min, max, scale, function(tmz) {
-      var cell = headRow.insertCell()
-      cell.innerText = tmz.toDateString()
-    })
+  function buildChartTable(data, scale) {
+    var table = document.createElement('table')
+    var tasks = Utils.flattenContains(data, 'Tasks')
+    var startDates = Utils.pluck(tasks, 'StartDate')
+    var durations = Utils.pluck(tasks, 'Duration')
+    var min = getEarliest(startDates)
+    var max = getLatest(startDates, durations)
 
+    buildBody(
+      tasks,
+      Utils.pluck(tasks, 'StartDate'), 
+      Utils.pluck(tasks, 'Duration'),
+      table, min, max, scale
+    )
+    buildHead(table, min, max, scale)
     return table
   }
 
@@ -173,7 +186,7 @@ var ChartBuilder = (function () {
     this.config = config
     this.config.scale = config.scale || DEFAULT_SCALE_TYPE
     this.data = updateDurations(data)
-    this.chart = makeDiagramFrom(this.data, this.config.scale)
+    this.chart = buildChartTable(this.data, this.config.scale)
   }
 
   ChartBuilder.prototype.mountTo = function(point){
