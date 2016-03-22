@@ -1,16 +1,5 @@
 'use strict';
 
-var TaskModel = {
-  Duration: 'number',
-  Id: 'string',
-  Name: 'string',
-  PersentDone: 'number',
-  StartDate: 'date',
-  Tasks: 'array',
-  expanded: 'bool'
-}
-
-
 
 var Utils = (function() {
 
@@ -81,7 +70,6 @@ var ChartBuilder = (function () {
     week: 7 * 24 * 60 * 60 * 1000,
     month: 30 * 24 * 60 * 60 * 1000,
   }
-  var DEFAULT_SCALE_TYPE = 'day'
   var DATA_INDEXES = {
     hour: [0, 2],
     day:  [2,1],
@@ -195,7 +183,7 @@ var ChartBuilder = (function () {
 
   function ChartBuilder(data, config) {
     this.config = config
-    this.config.scale = config.scale || DEFAULT_SCALE_TYPE
+    this.config.scale = config.scale
     this.data = updateDurations(data)
     this.chart = buildChartTable(this.data, this.config.scale)
   }
