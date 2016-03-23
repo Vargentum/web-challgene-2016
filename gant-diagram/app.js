@@ -24,8 +24,8 @@ var Utils = (function() {
     return str
   }
 
-  Utils.$ = function(query) {
-    return Array.prototype.slice.call(document.querySelectorAll(query))
+  Utils.$ = function(query, elem) {
+    return Array.prototype.slice.call((elem || document).querySelectorAll(query))
   }
 
   Utils.$$ = function(collection) {
@@ -131,6 +131,8 @@ var ChartBuilder = (function () {
       var startDate = dateToInt(startDates[i])
       var endDate = startDate + durToInt(durations[i])
 
+      bodyRow.setAttribute('data-task-id', i)
+      bodyRow.setAttribute('data-group-id', i)
       buildRow(min, max, scale, function(tmz) {
         var cell = bodyRow.insertCell()
         if (startDate <= dateToInt(tmz) && dateToInt(tmz) <= endDate) {
@@ -195,6 +197,12 @@ var ChartBuilder = (function () {
     point.appendChild(this.chart)
   };
 
+  ChartBuilder.prototype.processSelectedRows = function(startIdx, endIdx, callback) {
+    Utils.$$(this.chart.tBodies[0].rows)
+      .filter(function(r, rIdx) {return startIdx <= rIdx && rIdx <= endIdx})
+      .forEach(callback)
+  }
+
   return ChartBuilder
 })()
 
@@ -204,13 +212,18 @@ var ChartBuilder = (function () {
   GroupsBuilder
 ------------------------------------------------*/
 var GroupsBuilder = (function () {
+  var taskId = 0
+  var groupId = 0 //TODO: bind inside function (cause to error)
 
   function r_tasks(data) {
     var list = document.createElement('ul')
+    list.setAttribute('data-group-id', groupId++)
 
-    data.forEach(function(task) {
+    data.forEach(function(task, i) {
       var item = document.createElement('li')
       item.innerText = task.Name
+      item.setAttribute('data-task-id', taskId++)
+
       if (task.Tasks && task.Tasks.length) {
         item.appendChild(r_tasks(task.Tasks))
       }
@@ -231,6 +244,10 @@ var GroupsBuilder = (function () {
       point.removeChild(c)
     })
     point.appendChild(this.list)
+  }
+
+  GroupsBuilder.prototype.processSubTasks = function processSubTasks(elem, cb) {
+    Utils.$('ul', elem).forEach(cb)
   }
 
   return GroupsBuilder
@@ -261,6 +278,30 @@ var App = (function () {
     this.config.elem.appendChild(this.modules[name])
   }
 
+  function clickHandler(data, e) {
+    var t = e.target
+
+    if (!(t.tagName === 'LI' && 
+          t.hasAttributes('data-task-id') && 
+          t.querySelector('ul'))) return //TODO: more solid check
+
+    var startIdx = parseInt(t.getAttribute('data-task-id'))
+    var endIdx = startIdx + getLastChildIndex(t)
+    debugger
+
+    this.ChartBuilder.processSelectedRows(
+      startIdx,
+      endIdx,
+      function(row) {
+        row.classList.toggle('is-hidden')
+      }
+    )
+    this.GroupsBuilder.processSubTasks(t, function(list, i, parent) {
+      parent[0].classList.toggle('is-expanded')
+      list.classList.toggle('is-hidden')
+    })
+  }
+
 
   function App (config) {
     this.config = config
@@ -278,6 +319,7 @@ var App = (function () {
       this.ChartBuilder = new ChartBuilder(data, this.config)
       this.GroupsBuilder.mountTo(this.modules.groups)
       this.ChartBuilder.mountTo(this.modules.chart)
+      this.config.elem.addEventListener('click', clickHandler.bind(this, data))
     }
     getData(this.config.file, initComponents.bind(this))
   }

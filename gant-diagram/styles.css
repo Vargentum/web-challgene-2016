@@ -60,3 +60,12 @@ td.is-active {
 ul ul {
   margin-left: 15px;
 }
+
+tr.is-hidden td,
+.is-hidden {
+  display: none !important
+}
+
+.is-expanded {
+  border: 1px solid red
+}
