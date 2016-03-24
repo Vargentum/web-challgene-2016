@@ -153,7 +153,7 @@ var ChartBuilder = (function () {
 
     buildBody(
       tasks,
-      Utils.pluck(tasks, 'StartDate'), 
+      Utils.pluck(tasks, 'StartDate'),
       Utils.pluck(tasks, 'Duration'),
       table, min, max, scale
     )
@@ -176,7 +176,7 @@ var ChartBuilder = (function () {
       if (entry.Tasks && entry.Tasks.length) {
         entry.Duration = getChildrenDuration(entry.Tasks)
         updateDurations(entry.Tasks)
-      } 
+      }
       return entry
     })
   }
@@ -223,6 +223,7 @@ var GroupsBuilder = (function () {
       item.setAttribute('data-task-id', taskId++)
 
       if (task.Tasks && task.Tasks.length) {
+        item.classList.add('is-expanded')
         item.setAttribute('data-tasks-length', task.Tasks.length)
         item.appendChild(r_tasks(task.Tasks))
       }
@@ -294,7 +295,7 @@ var App = (function () {
   function clickHandler(e) {
     processLinkedRowsAndGroups.call(
       this,
-      e, 
+      e,
       function(t) {
         return (t.tagName === 'LI' && t.hasAttribute('data-task-id') && t.hasAttribute('data-tasks-length'))
       },
@@ -302,13 +303,20 @@ var App = (function () {
         row.classList.toggle('is-hidden')
       },
       function(list, i, parent) {
-        parent[0].classList.toggle('is-expanded')
         list.classList.toggle('is-hidden')
+        if (list.classList.contains('is-hidden')) {
+          list.parentElement.classList.add('is-collapsed')
+          list.parentElement.classList.remove('is-expanded')
+        }
+        else {
+          list.parentElement.classList.remove('is-collapsed')
+          list.parentElement.classList.add('is-expanded')
+        }
       }
     )
   }
 
-  function mouseEnterHandler(e) {
+  function mouseOverHandler(e) {
     processLinkedRowsAndGroups.call(
       this,
       e,
@@ -316,15 +324,16 @@ var App = (function () {
         return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
       },
       function(row) {
+        debugger
         row.classList.add('is-highlighted')
       },
       function(list, i, parent) {
-        list.classList.add('is-highlighted')
+        list.parentElement.classList.add('is-highlighted')
       }
     )
-  } 
-  
-  function mouseLeaveHandler(e) {
+  }
+
+  function mouseOutHandler(e) {
     processLinkedRowsAndGroups.call(
       this,
       e,
@@ -335,10 +344,10 @@ var App = (function () {
         row.classList.remove('is-highlighted')
       },
       function(list, i, parent) {
-        list.classList.remove('is-highlighted')
+        list.parentElement.classList.remove('is-highlighted')
       }
     )
-  } 
+  }
 
 
   function App (config) {
@@ -358,8 +367,8 @@ var App = (function () {
       this.GroupsBuilder.mountTo(this.modules.groups)
       this.ChartBuilder.mountTo(this.modules.chart)
       this.config.elem.addEventListener('click', clickHandler.bind(this))
-      this.config.elem.addEventListener('mouseover', mouseEnterHandler.bind(this))
-      this.config.elem.addEventListener('mouseout', mouseLeaveHandler.bind(this))
+      this.config.elem.addEventListener('mouseover', mouseOverHandler.bind(this))
+      this.config.elem.addEventListener('mouseout', mouseOutHandler.bind(this))
     }
     getData(this.config.file, initComponents.bind(this))
   }

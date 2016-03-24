@@ -61,23 +61,30 @@ ul ul {
   margin-left: 15px;
 }
 
+
+/*States ------------------------------------*/
+
 tr.is-hidden td,
 .is-hidden {
   display: none !important
 }
 
-.is-expanded {
-  border: 1px solid red;
-}
-
+.is-expanded,
+.is-collapsed,
 tr.is-highlighted td,
 .is-highlighted:not(tr) {
   position: relative
 }
 
+.is-expanded:before {
+  content: '▼'
+}
+.is-collapsed:before {
+  content: '▶'
+}
 
-tr.is-highlighted td:before,
-.is-highlighted:not(tr):before {
+tr.is-highlighted td:after,
+.is-highlighted:not(tr):after {
   content: '';
   position: absolute;
   left: 0;
