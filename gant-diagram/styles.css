@@ -67,5 +67,22 @@ tr.is-hidden td,
 }
 
 .is-expanded {
-  border: 1px solid red
+  border: 1px solid red;
+}
+
+tr.is-highlighted td,
+.is-highlighted:not(tr) {
+  position: relative
+}
+
+
+tr.is-highlighted td:before,
+.is-highlighted:not(tr):before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,.2)
 }

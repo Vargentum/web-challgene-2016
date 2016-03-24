@@ -132,7 +132,6 @@ var ChartBuilder = (function () {
       var endDate = startDate + durToInt(durations[i])
 
       bodyRow.setAttribute('data-task-id', i)
-      bodyRow.setAttribute('data-group-id', i)
       buildRow(min, max, scale, function(tmz) {
         var cell = bodyRow.insertCell()
         if (startDate <= dateToInt(tmz) && dateToInt(tmz) <= endDate) {
@@ -217,7 +216,6 @@ var GroupsBuilder = (function () {
 
   function r_tasks(data) {
     var list = document.createElement('ul')
-    list.setAttribute('data-group-id', groupId++)
 
     data.forEach(function(task, i) {
       var item = document.createElement('li')
@@ -225,6 +223,7 @@ var GroupsBuilder = (function () {
       item.setAttribute('data-task-id', taskId++)
 
       if (task.Tasks && task.Tasks.length) {
+        item.setAttribute('data-tasks-length', task.Tasks.length)
         item.appendChild(r_tasks(task.Tasks))
       }
       list.appendChild(item)
@@ -278,29 +277,68 @@ var App = (function () {
     this.config.elem.appendChild(this.modules[name])
   }
 
-  function clickHandler(data, e) {
+  function processLinkedRowsAndGroups(e, validTarget, rHandler, gHandler) {
     var t = e.target
-
-    if (!(t.tagName === 'LI' && 
-          t.hasAttributes('data-task-id') && 
-          t.querySelector('ul'))) return //TODO: more solid check
-
+    if (!validTarget(t)) return
     var startIdx = parseInt(t.getAttribute('data-task-id'))
-    var endIdx = startIdx + getLastChildIndex(t)
-    debugger
+    var endIdx =   parseInt(t.getAttribute('data-tasks-length')) + startIdx
 
     this.ChartBuilder.processSelectedRows(
       startIdx,
       endIdx,
+      rHandler
+    )
+    this.GroupsBuilder.processSubTasks(t, gHandler)
+  }
+
+  function clickHandler(e) {
+    processLinkedRowsAndGroups.call(
+      this,
+      e, 
+      function(t) {
+        return (t.tagName === 'LI' && t.hasAttribute('data-task-id') && t.hasAttribute('data-tasks-length'))
+      },
       function(row) {
         row.classList.toggle('is-hidden')
+      },
+      function(list, i, parent) {
+        parent[0].classList.toggle('is-expanded')
+        list.classList.toggle('is-hidden')
       }
     )
-    this.GroupsBuilder.processSubTasks(t, function(list, i, parent) {
-      parent[0].classList.toggle('is-expanded')
-      list.classList.toggle('is-hidden')
-    })
   }
+
+  function mouseEnterHandler(e) {
+    processLinkedRowsAndGroups.call(
+      this,
+      e,
+      function(t) {
+        return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
+      },
+      function(row) {
+        row.classList.add('is-highlighted')
+      },
+      function(list, i, parent) {
+        list.classList.add('is-highlighted')
+      }
+    )
+  } 
+  
+  function mouseLeaveHandler(e) {
+    processLinkedRowsAndGroups.call(
+      this,
+      e,
+      function(t) {
+        return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
+      },
+      function(row) {
+        row.classList.remove('is-highlighted')
+      },
+      function(list, i, parent) {
+        list.classList.remove('is-highlighted')
+      }
+    )
+  } 
 
 
   function App (config) {
@@ -319,7 +357,9 @@ var App = (function () {
       this.ChartBuilder = new ChartBuilder(data, this.config)
       this.GroupsBuilder.mountTo(this.modules.groups)
       this.ChartBuilder.mountTo(this.modules.chart)
-      this.config.elem.addEventListener('click', clickHandler.bind(this, data))
+      this.config.elem.addEventListener('click', clickHandler.bind(this))
+      this.config.elem.addEventListener('mouseover', mouseEnterHandler.bind(this))
+      this.config.elem.addEventListener('mouseout', mouseLeaveHandler.bind(this))
     }
     getData(this.config.file, initComponents.bind(this))
   }
