@@ -53,10 +53,39 @@ var Utils = (function() {
       })
   }
 
+  Utils.mount = function mount(node, point){
+    Utils.$$(point.children).forEach(function(chld) {
+      point.removeChild(chld)
+    })
+    point.appendChild(node) 
+  }
+
+  Utils.unmount = function unmount(node, point) {
+    point.removeChild(node)
+  }
+
 
   return Utils
 })()
 
+
+
+
+/*------------------------------------------
+  Error module
+------------------------------------------*/
+var ErrorArea = (function() {
+    function render(data) {
+      return Util.template("<div><h2>${name}</h2><p>${message}</p></div>", data)
+    }
+    function ErrorArea(name, message) {
+      this.node = render({
+        name: name,
+        message: message
+      })
+    }
+
+})
 
 
 /*-------------------------------------------
@@ -71,9 +100,9 @@ var ChartBuilder = (function () {
     month: 30 * 24 * 60 * 60 * 1000,
   }
   var DATA_INDEXES = {
-    hour: [0, 2],
-    day:  [2,1],
-    week: [2,3],
+    hour:  [0, 2],
+    day:   [2,1],
+    week:  [2,3],
     month: [1,3]
   }
   // "Mon Jan 18 2010"
@@ -189,13 +218,6 @@ var ChartBuilder = (function () {
     this.chart = buildChartTable(this.data, this.config.scale)
   }
 
-  ChartBuilder.prototype.mountTo = function(point){
-    Utils.$$(point.children).forEach(function(c) {
-      point.removeChild(c)
-    })
-    point.appendChild(this.chart)
-  };
-
   ChartBuilder.prototype.processSelectedRows = function(startIdx, endIdx, callback) {
     Utils.$$(this.chart.tBodies[0].rows)
       .filter(function(r, rIdx) {return startIdx <= rIdx && rIdx <= endIdx})
@@ -250,13 +272,6 @@ var GroupsBuilder = (function () {
     this.list = r_tasks(this.data)
   }
 
-  GroupsBuilder.prototype.mountTo = function mountTo(point) {
-    Utils.$$(point.children).forEach(function(c) {
-      point.removeChild(c)
-    })
-    point.appendChild(this.list)
-  }
-
   GroupsBuilder.prototype.processSubTasks = function processSubTasks(elem, cb) {
     Utils.$('ul', elem).forEach(cb)
   }
@@ -273,14 +288,18 @@ var GroupsBuilder = (function () {
 ------------------------------------------*/
 var App = (function () {
 
-  function getData(file, onsuccess) {
+  function getData(file, onsuccess, onerror) {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', file)
     xhr.send()
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== 4) return //loading handling
-      if (xhr.status !== 200) return //error handling
-      onsuccess(JSON.parse(xhr.responseText))
+      if (xhr.status !== 200) {
+        onerror(xhr.status, xhr.statusText)
+      }
+      else {
+        onsuccess(JSON.parse(xhr.responseText))
+      }
     }
   }
 
@@ -394,11 +413,27 @@ var App = (function () {
     }, this)
   }
 
+  function onDataSuccess(data) {
+    this.GroupsBuilder = new GroupsBuilder(data, this.config)
+    this.ChartBuilder = new ChartBuilder(data, this.config)
+    // this.ErrorArea.unmountFrom(this.modules.error)
+    Utils.mount(this.GroupsBuilder.list, this.modules.groups)
+    Utils.mount(this.ChartBuilder.chart, this.modules.chart)
+  }
+
+  function onDataFail(status, message) {
+    this.ErrorArea = new ErrorArea(status, message, this.config)
+    // this.GroupsBuilder.unmountFrom(this.modules.groups)
+    // this.ChartBuilder.unmountFrom(this.modules.chart)
+    Utils.mount(this.ErrorArea.node, this.modules.error)
+  }
+
   function App (config) {
     this.config = config
     this.modules = {
       groups: document.createElement('div'),
-      chart: document.createElement('div')
+      chart: document.createElement('div'),
+      error: document.createElement('div')
     }
     Object.keys(this.modules).forEach(initModules.bind(this))
     listnersController.call(this, 'addEventListener')
@@ -406,13 +441,11 @@ var App = (function () {
   }
 
   App.prototype.init = function() {
-    function initComponents(data) {
-      this.GroupsBuilder = new GroupsBuilder(data, this.config)
-      this.ChartBuilder = new ChartBuilder(data, this.config)
-      this.GroupsBuilder.mountTo(this.modules.groups)
-      this.ChartBuilder.mountTo(this.modules.chart)
-    }
-    getData(this.config.file, initComponents.bind(this))
+    getData(
+      this.config.file,
+      onDataSuccess.bind(this),
+      onDataFail.bind(this)
+    )
   }
 
   App.prototype.update = function(newConfig) {
