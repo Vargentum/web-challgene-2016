@@ -211,25 +211,36 @@ var ChartBuilder = (function () {
   GroupsBuilder
 ------------------------------------------------*/
 var GroupsBuilder = (function () {
-  var taskId = 0
-  var groupId = 0 //TODO: bind inside function (cause to error)
+
+  function getTL(data) {
+    return data.reduce(function(p, task) {
+      if (task.Tasks && task.Tasks.length) {
+        return p += getTL(task.Tasks) + 1
+      }
+      return p + 1
+    }, 0)
+  }
 
   function r_tasks(data) {
-    var list = document.createElement('ul')
+    var tId = 0
 
-    data.forEach(function(task, i) {
-      var item = document.createElement('li')
-      item.innerText = task.Name
-      item.setAttribute('data-task-id', taskId++)
+    return (function dataToTasks(data) {
+      var list = document.createElement('ul')
 
-      if (task.Tasks && task.Tasks.length) {
-        item.classList.add('is-expanded')
-        item.setAttribute('data-tasks-length', task.Tasks.length)
-        item.appendChild(r_tasks(task.Tasks))
-      }
-      list.appendChild(item)
-    })
-    return list
+      data.forEach(function(task) {
+        var item = document.createElement('li')
+        item.innerText = task.Name
+        item.setAttribute('data-task-id', tId++)
+
+        if (task.Tasks && task.Tasks.length) {
+          item.classList.add('is-expanded')
+          item.appendChild(dataToTasks(task.Tasks))
+          item.setAttribute('data-tasks-length', getTL(task.Tasks))
+        }
+        list.appendChild(item)
+      })
+      return list
+    })(data)
   }
 
 
@@ -286,10 +297,13 @@ var App = (function () {
 
     this.ChartBuilder.processSelectedRows(
       startIdx,
-      endIdx,
-      rHandler
+      endIdx || startIdx, //TODO: make more clearly
+      rHandler.bind(this)
     )
-    this.GroupsBuilder.processSubTasks(t, gHandler)
+    this.GroupsBuilder.processSubTasks(
+      t,
+      gHandler.bind(this)
+    )
   }
 
   function clickHandler(e) {
@@ -299,7 +313,8 @@ var App = (function () {
       function(t) {
         return (t.tagName === 'LI' && t.hasAttribute('data-task-id') && t.hasAttribute('data-tasks-length'))
       },
-      function(row) {
+      function(row, i) {
+        if (i === 0) return 
         row.classList.toggle('is-hidden')
       },
       function(list, i, parent) {
@@ -324,10 +339,12 @@ var App = (function () {
         return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
       },
       function(row) {
-        debugger
         row.classList.add('is-highlighted')
       },
       function(list, i, parent) {
+        Utils.$('li', this.GroupsBuilder.list).forEach(function(item) {
+          item.classList.remove('is-highlighted')
+        })
         list.parentElement.classList.add('is-highlighted')
       }
     )
@@ -349,6 +366,33 @@ var App = (function () {
     )
   }
 
+  function mouseMoveHandler(e) {
+    processLinkedRowsAndGroups.call(
+      this,
+      e, 
+      function(t) {
+        return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
+      },
+      function(row) {
+        row.classList.remove('is-highlighted')
+      },
+      function(list, i, parent) {
+        list.parentElement.classList.remove('is-highlighted')
+      }
+    )
+  }
+
+  var AppListeners = {
+    click: clickHandler,
+    mouseover: mouseOverHandler,
+    mouseout: mouseOutHandler
+  }
+
+  function listnersController (method) {
+    Object.keys(AppListeners).forEach(function (type) {
+      this.config.elem[method](type, AppListeners[type].bind(this))
+    }, this)
+  }
 
   function App (config) {
     this.config = config
@@ -357,6 +401,7 @@ var App = (function () {
       chart: document.createElement('div')
     }
     Object.keys(this.modules).forEach(initModules.bind(this))
+    listnersController.call(this, 'addEventListener')
     this.init()
   }
 
@@ -366,9 +411,6 @@ var App = (function () {
       this.ChartBuilder = new ChartBuilder(data, this.config)
       this.GroupsBuilder.mountTo(this.modules.groups)
       this.ChartBuilder.mountTo(this.modules.chart)
-      this.config.elem.addEventListener('click', clickHandler.bind(this))
-      this.config.elem.addEventListener('mouseover', mouseOverHandler.bind(this))
-      this.config.elem.addEventListener('mouseout', mouseOutHandler.bind(this))
     }
     getData(this.config.file, initComponents.bind(this))
   }
