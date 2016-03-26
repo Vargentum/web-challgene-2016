@@ -2,28 +2,24 @@
   {
     "StartDate": "2010-01-18T00:00:00",
     "Duration": "8",
-    "PercentDone": "40",
     "Id": "2",
     "Name": "Ext 4.x branch",
     "cls": "ExtJS",
     "Tasks": [
       {
         "Duration": "4",
-        "PercentDone": "50",
         "StartDate": "2010-01-18T00:00:00",
         "Id": "3",
         "Name": "Ext JS 4.0.1"
       },
       {
         "Duration": "7",
-        "PercentDone": "30",
         "StartDate": "2010-01-22T00:00:00",
         "Id": "4",
         "Name": "Ext JS 4.0.2"
       },
       {
         "Duration": "2",
-        "PercentDone": "10",
         "StartDate": "2010-01-29T00:00:00",
         "Id": "5",
         "Name": "Ext JS 4.0.3"
@@ -33,28 +29,24 @@
   {
     "StartDate": "2010-01-31T00:00:00",
     "Duration": "8",
-    "PercentDone": "40",
     "Id": "6",
     "Name": "Ext 6.x branch",
     "cls": "ExtJS",
     "Tasks": [
       {
         "Duration": "6",
-        "PercentDone": "50",
         "StartDate": "2010-01-31T00:00:00",
         "Id": "7",
         "Name": "Ext JS 6.0.1"
       },
       {
         "Duration": "3",
-        "PercentDone": "30",
         "StartDate": "2010-02-06T00:00:00",
         "Id": "8",
         "Name": "Ext JS 6.0.2"
       },
       {
         "Duration": "4",
-        "PercentDone": "10",
         "StartDate": "2010-02-09T00:00:00",
         "Id": "9",
         "Name": "Ext JS 6.0.3"
@@ -64,28 +56,24 @@
   {
     "StartDate": "2010-01-28T00:00:00",
     "Duration": "12",
-    "PercentDone": "28",
     "Id": "Bryntum",
     "cls": "Bryntum",
     "Name": "Bryntum Releases",
     "Tasks": [
       {
         "Duration": "3",
-        "PercentDone": "50",
         "StartDate": "2010-01-28T00:00:00",
         "Id": "13",
         "Name": "Product X"
       },
       {
         "Duration": "5",
-        "PercentDone": "30",
         "StartDate": "2010-01-30T00:00:00",
         "Id": "14",
         "Name": "Ext Gantt 2.0"
       },
       {
         "Duration": "4",
-        "PercentDone": "10",
         "StartDate": "2010-02-03T00:00:00",
         "Id": "15",
         "Name": "Ext Scheduler 2.0"
@@ -95,28 +83,24 @@
   {
     "StartDate": "2010-01-28T00:00:00",
     "Duration": "12",
-    "PercentDone": "28",
     "Id": "Spectrum",
     "cls": "Spectrum",
     "Name": "Spectrum Releases",
     "Tasks": [
       {
         "Duration": "5",
-        "PercentDone": "50",
         "StartDate": "2010-01-21T00:00:00",
         "Id": "16",
         "Name": "Alpha version"
       },
       {
         "Duration": "13",
-        "PercentDone": "30",
         "StartDate": "2010-01-26T00:00:00",
         "Id": "17",
         "Name": "Beta version"
       },
       {
         "Duration": "4",
-        "PercentDone": "10",
         "StartDate": "2010-02-07T00:00:00",
         "Id": "18",
         "Name": "Customers version"

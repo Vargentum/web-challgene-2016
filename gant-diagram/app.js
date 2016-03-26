@@ -7,7 +7,6 @@ var Utils = (function() {
 
   Utils.objectAssign = function objectAssign() {
     var args = Array.prototype.slice.call(arguments)
-    var restlt = {}
 
     return args.reduce(function(prev, next) {
       return Object.keys(next).reduce(function(p, k) {
@@ -61,6 +60,7 @@ var Utils = (function() {
   }
 
   Utils.unmount = function unmount(node, point) {
+    if (node.parentElement !== point) return
     point.removeChild(node)
   }
 
@@ -97,11 +97,12 @@ ChartBuilder
 var ChartBuilder = (function () {
 
   var SCALE_TYPES = {
-    hour: 60 * 60 * 1000,
-    day: 24 * 60 * 60 * 1000,
-    week: 7 * 24 * 60 * 60 * 1000,
-    month: 30 * 24 * 60 * 60 * 1000,
+    hour: 60 * 60 * 1000
   }
+  SCALE_TYPES.day =   24 * SCALE_TYPES.hour
+  SCALE_TYPES.week =   7 * SCALE_TYPES.day
+  SCALE_TYPES.month = 30 * SCALE_TYPES.week
+
   var DATA_INDEXES = {
     hour:  [0, 2],
     day:   [2,1],
@@ -318,7 +319,7 @@ var App = (function () {
       endIdx || startIdx, //TODO: make more clearly
       rHandler.bind(this)
     )
-    gHandler.call(this, t, e.relatedTarget)
+    gHandler.call(this, t)
   }
 
   function clickHandler(e) {
@@ -358,7 +359,7 @@ var App = (function () {
       function(row) {
         row.classList.add('is-highlighted')
       },
-      function(t, rt) {
+      function(t) {
         t.classList.add('is-highlighted')
       }
     )
@@ -374,7 +375,7 @@ var App = (function () {
       function(row) {
         row.classList.remove('is-highlighted')
       },
-      function(t, rt) {
+      function(t) {
         t.classList.remove('is-highlighted')
       }
     )
