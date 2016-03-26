@@ -1,74 +1,65 @@
 [
   {
-    "Id": "Sencha",
-    "Name": "Sencha Releases",
     "StartDate": "2010-01-18T00:00:00",
     "Duration": "8",
     "PercentDone": "40",
-    "cls": "Sencha",
+    "Id": "2",
+    "Name": "Ext 4.x branch",
+    "cls": "ExtJS",
     "Tasks": [
       {
+        "Duration": "4",
+        "PercentDone": "50",
         "StartDate": "2010-01-18T00:00:00",
-        "Duration": "8",
-        "PercentDone": "40",
-        "Id": "2",
-        "Name": "Ext 4.x branch",
-        "cls": "ExtJS",
-        "Tasks": [
-          {
-            "Duration": "4",
-            "PercentDone": "50",
-            "StartDate": "2010-01-18T00:00:00",
-            "Id": "3",
-            "Name": "Ext JS 4.0.1"
-          },
-          {
-            "Duration": "7",
-            "PercentDone": "30",
-            "StartDate": "2010-01-22T00:00:00",
-            "Id": "4",
-            "Name": "Ext JS 4.0.2"
-          },
-          {
-            "Duration": "2",
-            "PercentDone": "10",
-            "StartDate": "2010-01-29T00:00:00",
-            "Id": "5",
-            "Name": "Ext JS 4.0.3"
-          }
-        ]
-      },{
-        "StartDate": "2010-01-31T00:00:00",
-        "Duration": "8",
-        "PercentDone": "40",
-        "Id": "6",
-        "Name": "Ext 6.x branch",
-        "cls": "ExtJS",
-        "Tasks": [
-          {
-            "Duration": "6",
-            "PercentDone": "50",
-            "StartDate": "2010-01-31T00:00:00",
-            "Id": "7",
-            "Name": "Ext JS 6.0.1"
-          },
-          {
-            "Duration": "3",
-            "PercentDone": "30",
-            "StartDate": "2010-02-06T00:00:00",
-            "Id": "8",
-            "Name": "Ext JS 6.0.2"
-          },
-          {
-            "Duration": "4",
-            "PercentDone": "10",
-            "StartDate": "2010-02-09T00:00:00",
-            "Id": "9",
-            "Name": "Ext JS 6.0.3"
-          }
-        ]
+        "Id": "3",
+        "Name": "Ext JS 4.0.1"
+      },
+      {
+        "Duration": "7",
+        "PercentDone": "30",
+        "StartDate": "2010-01-22T00:00:00",
+        "Id": "4",
+        "Name": "Ext JS 4.0.2"
+      },
+      {
+        "Duration": "2",
+        "PercentDone": "10",
+        "StartDate": "2010-01-29T00:00:00",
+        "Id": "5",
+        "Name": "Ext JS 4.0.3"
       }
-    ] 
+    ]
+  },
+  {
+    "StartDate": "2010-01-31T00:00:00",
+    "Duration": "8",
+    "PercentDone": "40",
+    "Id": "6",
+    "Name": "Ext 6.x branch",
+    "cls": "ExtJS",
+    "Tasks": [
+      {
+        "Duration": "6",
+        "PercentDone": "50",
+        "StartDate": "2010-01-31T00:00:00",
+        "Id": "7",
+        "Name": "Ext JS 6.0.1"
+      },
+      {
+        "Duration": "3",
+        "PercentDone": "30",
+        "StartDate": "2010-02-06T00:00:00",
+        "Id": "8",
+        "Name": "Ext JS 6.0.2"
+      },
+      {
+        "Duration": "4",
+        "PercentDone": "10",
+        "StartDate": "2010-02-09T00:00:00",
+        "Id": "9",
+        "Name": "Ext JS 6.0.3"
+      }
+    ]
   },
   {
     "StartDate": "2010-01-28T00:00:00",
