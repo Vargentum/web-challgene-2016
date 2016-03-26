@@ -75,17 +75,20 @@ var Utils = (function() {
   Error module
 ------------------------------------------*/
 var ErrorArea = (function() {
-    function render(data) {
-      return Util.template("<div><h2>${name}</h2><p>${message}</p></div>", data)
-    }
-    function ErrorArea(name, message) {
-      this.node = render({
-        name: name,
-        message: message
-      })
-    }
+  function render(data) {
+    return Utils.template("<div><h2>${name}</h2><p>${message}</p></div>", data)
+  }
+  
+  function ErrorArea(name, message) {
+    this.node = document.createElement('div')
+    this.node.innerHTML = render({
+      name: name,
+      message: message
+    })
+  }
 
-})
+  return ErrorArea
+})()
 
 
 /*-------------------------------------------
@@ -416,15 +419,18 @@ var App = (function () {
   function onDataSuccess(data) {
     this.GroupsBuilder = new GroupsBuilder(data, this.config)
     this.ChartBuilder = new ChartBuilder(data, this.config)
-    // this.ErrorArea.unmountFrom(this.modules.error)
     Utils.mount(this.GroupsBuilder.list, this.modules.groups)
     Utils.mount(this.ChartBuilder.chart, this.modules.chart)
+
+    if (this.ErrorArea.node) {
+      Utils.unmount(this.ErrorArea.node, this.modules.error)
+    }
   }
 
   function onDataFail(status, message) {
     this.ErrorArea = new ErrorArea(status, message, this.config)
-    // this.GroupsBuilder.unmountFrom(this.modules.groups)
-    // this.ChartBuilder.unmountFrom(this.modules.chart)
+    Utils.unmount(this.GroupsBuilder.list, this.modules.groups)
+    Utils.unmount(this.ChartBuilder.chart, this.modules.chart)
     Utils.mount(this.ErrorArea.node, this.modules.error)
   }
 
