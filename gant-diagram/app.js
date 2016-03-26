@@ -275,10 +275,6 @@ var GroupsBuilder = (function () {
     this.list = r_tasks(this.data)
   }
 
-  GroupsBuilder.prototype.processSubTasks = function processSubTasks(elem, cb) {
-    Utils.$('ul', elem).forEach(cb)
-  }
-
   return GroupsBuilder
 })()
 
@@ -322,10 +318,7 @@ var App = (function () {
       endIdx || startIdx, //TODO: make more clearly
       rHandler.bind(this)
     )
-    this.GroupsBuilder.processSubTasks(
-      t,
-      gHandler.bind(this)
-    )
+    gHandler.call(this, t, e.relatedTarget)
   }
 
   function clickHandler(e) {
@@ -339,16 +332,18 @@ var App = (function () {
         if (i === 0) return 
         row.classList.toggle('is-hidden')
       },
-      function(list, i, parent) {
-        list.classList.toggle('is-hidden')
-        if (list.classList.contains('is-hidden')) {
-          list.parentElement.classList.add('is-collapsed')
-          list.parentElement.classList.remove('is-expanded')
-        }
-        else {
-          list.parentElement.classList.remove('is-collapsed')
-          list.parentElement.classList.add('is-expanded')
-        }
+      function(t) {
+        Utils.$('ul', t).forEach(function(list) {
+          list.classList.toggle('is-hidden')
+          if (list.classList.contains('is-hidden')) {
+            list.parentElement.classList.add('is-collapsed')
+            list.parentElement.classList.remove('is-expanded')
+          }
+          else {
+            list.parentElement.classList.remove('is-collapsed')
+            list.parentElement.classList.add('is-expanded')
+          }
+        })
       }
     )
   }
@@ -363,11 +358,8 @@ var App = (function () {
       function(row) {
         row.classList.add('is-highlighted')
       },
-      function(list, i, parent) {
-        Utils.$('li', this.GroupsBuilder.list).forEach(function(item) {
-          item.classList.remove('is-highlighted')
-        })
-        list.parentElement.classList.add('is-highlighted')
+      function(t, rt) {
+        t.classList.add('is-highlighted')
       }
     )
   }
@@ -382,24 +374,8 @@ var App = (function () {
       function(row) {
         row.classList.remove('is-highlighted')
       },
-      function(list, i, parent) {
-        list.parentElement.classList.remove('is-highlighted')
-      }
-    )
-  }
-
-  function mouseMoveHandler(e) {
-    processLinkedRowsAndGroups.call(
-      this,
-      e, 
-      function(t) {
-        return (t.tagName === 'LI' && t.hasAttribute('data-task-id'))
-      },
-      function(row) {
-        row.classList.remove('is-highlighted')
-      },
-      function(list, i, parent) {
-        list.parentElement.classList.remove('is-highlighted')
+      function(t, rt) {
+        t.classList.remove('is-highlighted')
       }
     )
   }
@@ -422,7 +398,7 @@ var App = (function () {
     Utils.mount(this.GroupsBuilder.list, this.modules.groups)
     Utils.mount(this.ChartBuilder.chart, this.modules.chart)
 
-    if (this.ErrorArea.node) {
+    if (this.ErrorArea) {
       Utils.unmount(this.ErrorArea.node, this.modules.error)
     }
   }
